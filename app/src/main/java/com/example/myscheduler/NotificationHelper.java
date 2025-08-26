@@ -175,6 +175,55 @@ public class NotificationHelper {
     }
     
     /**
+     * 显示任务执行成功通知
+     */
+    public void showExecutionSuccessNotification(String taskType) {
+        String title = "✅ 定时任务执行成功";
+        String content = String.format("🚀 %s任务已成功启动钉钉应用", 
+                TASK_TYPE_DAILY.equals(taskType) ? "每日定时" : "即时");
+        
+        showSimpleNotification(title, content, true);
+    }
+    
+    /**
+     * 显示任务执行失败通知
+     */
+    public void showExecutionFailureNotification() {
+        String title = "❌ 定时任务执行失败";
+        String content = "🚫 无法启动钉钉应用，请检查是否已安装";
+        
+        showSimpleNotification(title, content, false);
+    }
+    
+    /**
+     * 显示简单通知
+     */
+    private void showSimpleNotification(String title, String content, boolean autoCancel) {
+        Intent intent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // 提高优先级确保显示
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(autoCancel)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        
+        try {
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // 添加常量定义
+    private static final String TASK_TYPE_DAILY = "daily";
+    private static final String TASK_TYPE_INSTANT = "instant";
+    
+    /**
      * 创建前台服务通知
      */
     public Notification createForegroundServiceNotification() {

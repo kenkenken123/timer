@@ -41,30 +41,35 @@ public class MainActivity extends AppCompatActivity {
 
         Button btn = findViewById(R.id.btn_schedule);
         Button btnStartDingDing = findViewById(R.id.btn_start_dingding);
+        Button btnTestDingDing = findViewById(R.id.btn_test_dingding);
 
         btn.setOnClickListener(v -> {
-            // 设置钉钉应用的包名和Activity
-            String targetPackage = "com.alibaba.android.rimet";
-            String targetActivity = "com.alibaba.android.rimet.biz.SplashActivity";
+            // 检查钉钉应用是否已安装
+            if (!AlarmReceiver.isDingDingInstalled(this)) {
+                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
+                return;
+            }
 
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             
             // 设置每天9:25的定时任务
-            setDailyAlarm(alarmManager, targetPackage, targetActivity, 9, 25, 1001);
+            setDailyAlarmWithBroadcast(alarmManager, 9, 25, 1001);
             
             // 设置每天18:35的定时任务
-            setDailyAlarm(alarmManager, targetPackage, targetActivity, 18, 35, 1002);
+            setDailyAlarmWithBroadcast(alarmManager, 18, 35, 1002);
 
-            Toast.makeText(this, "已设置每日定时任务：\n9:25 和 18:35 启动钉钉", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "✅ 已设置每日定时任务：\n9:25 和 18:35 启动钉钉", Toast.LENGTH_LONG).show();
             
             // 显示下次定时任务的通知
             notificationHelper.showDailyScheduleNotification();
         });
 
         btnStartDingDing.setOnClickListener(v -> {
-            // 设置1分钟后启动钉钉
-            String targetPackage = "com.alibaba.android.rimet";
-            String targetActivity = "com.alibaba.android.rimet.biz.SplashActivity";
+            // 检查钉钉应用是否已安装
+            if (!AlarmReceiver.isDingDingInstalled(this)) {
+                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
+                return;
+            }
 
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             
@@ -72,13 +77,13 @@ public class MainActivity extends AppCompatActivity {
             Calendar targetTime = Calendar.getInstance();
             targetTime.add(Calendar.MINUTE, 1);
             
-            // 创建启动钉钉的Intent
-            Intent intent = new Intent();
-            intent.setClassName(targetPackage, targetActivity);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // 创建广播意图
+            Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
+            broadcastIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
+            broadcastIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, AlarmReceiver.TASK_TYPE_INSTANT);
 
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    this, 2001, intent, PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    this, 2001, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
 
             // 设置一次性闹钟（1分钟后触发）
             alarmManager.setExact(
@@ -87,20 +92,43 @@ public class MainActivity extends AppCompatActivity {
                 pendingIntent
             );
 
-            Toast.makeText(this, "1分钟后将自动启动钉钉应用", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "✅ 1分钟后将自动启动钉钉应用", Toast.LENGTH_LONG).show();
             
             // 显示即时定时任务的通知
             notificationHelper.showInstantScheduleNotification();
         });
+        
+        // 测试按钮：立即启动钉钉应用
+        btnTestDingDing.setOnClickListener(v -> {
+            // 检查钉钉应用是否已安装
+            if (!AlarmReceiver.isDingDingInstalled(this)) {
+                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
+                return;
+            }
+            
+            // 直接调用AlarmReceiver的逻辑来测试启动
+            Intent testIntent = new Intent(this, AlarmReceiver.class);
+            testIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
+            testIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, "test");
+            
+            AlarmReceiver receiver = new AlarmReceiver();
+            receiver.onReceive(this, testIntent);
+            
+            Toast.makeText(this, "🗋 正在测试启动钉钉...", Toast.LENGTH_SHORT).show();
+        });
     }
     
-    private void setDailyAlarm(AlarmManager alarmManager, String targetPackage, String targetActivity, int hour, int minute, int requestCode) {
-        Intent intent = new Intent();
-        intent.setClassName(targetPackage, targetActivity);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    /**
+     * 使用广播方式设置每日定时任务（更可靠）
+     */
+    private void setDailyAlarmWithBroadcast(AlarmManager alarmManager, int hour, int minute, int requestCode) {
+        // 创建广播意图
+        Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
+        broadcastIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
+        broadcastIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, AlarmReceiver.TASK_TYPE_DAILY);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, requestCode, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this, requestCode, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
 
         // 获取当前时间
         Calendar calendar = Calendar.getInstance();
@@ -124,6 +152,9 @@ public class MainActivity extends AppCompatActivity {
             AlarmManager.INTERVAL_DAY,  // 每天重复
             pendingIntent
         );
+        
+        android.util.Log.i("MainActivity", String.format("设置每日定时任务: %02d:%02d, 下次执行: %s", 
+                hour, minute, android.text.format.DateFormat.format("yyyy-MM-dd HH:mm:ss", targetTime)));
     }
     
     /**
