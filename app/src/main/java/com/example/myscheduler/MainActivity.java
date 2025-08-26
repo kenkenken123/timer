@@ -39,32 +39,13 @@ public class MainActivity extends AppCompatActivity {
         // 设置电池优化白名单
         batteryHelper.setupKeepAlive(this);
 
-        Button btn = findViewById(R.id.btn_schedule);
         Button btnStartDingDing = findViewById(R.id.btn_start_dingding);
         Button btnTestDingDing = findViewById(R.id.btn_test_dingding);
+        
+        // 自动设置工作日定时任务
+        setupWorkdaySchedule();
 
-        btn.setOnClickListener(v -> {
-            // 检查钉钉应用是否已安装
-            if (!AlarmReceiver.isDingDingInstalled(this)) {
-                Toast.makeText(this, getString(R.string.toast_dingding_not_installed), Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            
-            // 设置每天9:25的定时任务
-            setDailyAlarmWithBroadcast(alarmManager, 9, 25, 1001);
-            
-            // 设置每天18:35的定时任务
-            setDailyAlarmWithBroadcast(alarmManager, 18, 35, 1002);
-
-            Toast.makeText(this, getString(R.string.toast_daily_task_set), Toast.LENGTH_LONG).show();
-            
-            // 显示下次定时任务的通知
-            notificationHelper.showDailyScheduleNotification();
-        });
-
-        btnStartDingDing.setOnClickListener(v -> {
+btnStartDingDing.setOnClickListener(v -> {
             // 检查钉钉应用是否已安装
             if (!AlarmReceiver.isDingDingInstalled(this)) {
                 Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
@@ -117,45 +98,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, getString(R.string.toast_testing_start), Toast.LENGTH_SHORT).show();
         });
     }
-    
-    /**
-     * 使用广播方式设置每日定时任务（更可靠）
-     */
-    private void setDailyAlarmWithBroadcast(AlarmManager alarmManager, int hour, int minute, int requestCode) {
-        // 创建广播意图
-        Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
-        broadcastIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
-        broadcastIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, AlarmReceiver.TASK_TYPE_DAILY);
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                this, requestCode, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        // 获取当前时间
-        Calendar calendar = Calendar.getInstance();
-        Calendar targetTime = Calendar.getInstance();
-        
-        // 设置目标时间（今天的指定时间）
-        targetTime.set(Calendar.HOUR_OF_DAY, hour);
-        targetTime.set(Calendar.MINUTE, minute);
-        targetTime.set(Calendar.SECOND, 0);
-        targetTime.set(Calendar.MILLISECOND, 0);
-        
-        // 如果今天的指定时间已经过了，设置为明天的同一时间
-        if (targetTime.getTimeInMillis() <= calendar.getTimeInMillis()) {
-            targetTime.add(Calendar.DAY_OF_MONTH, 1);
-        }
-        
-        // 设置每日重复的闹钟
-        alarmManager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            targetTime.getTimeInMillis(),
-            AlarmManager.INTERVAL_DAY,  // 每天重复
-            pendingIntent
-        );
-        
-        android.util.Log.i("MainActivity", String.format("设置每日定时任务: %02d:%02d, 下次执行: %s", 
-                hour, minute, android.text.format.DateFormat.format("yyyy-MM-dd HH:mm:ss", targetTime)));
-    }
     
     /**
      * 请求通知权限
@@ -196,5 +139,56 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(R.string.toast_notification_denied), Toast.LENGTH_LONG).show();
             }
         }
+    }
+    
+    /**
+     * 自动设置工作日定时任务
+     */
+    private void setupWorkdaySchedule() {
+        // 检查钉钉应用是否已安装
+        if (!AlarmReceiver.isDingDingInstalled(this)) {
+            android.util.Log.w("MainActivity", "钉钉应用未安装，跳过设置定时任务");
+            return;
+        }
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        
+        // 设置工作日上班打卡：9:25
+        setWorkdayAlarmWithBroadcast(alarmManager, 9, 25, 1001);
+        
+        // 设置工作日下班打卡：18:35
+        setWorkdayAlarmWithBroadcast(alarmManager, 18, 35, 1002);
+
+        android.util.Log.i("MainActivity", "已自动设置工作日定时任务：9:25和18:35");
+        
+        // 显示下次定时任务的通知
+        notificationHelper.showDailyScheduleNotification();
+    }
+    
+    /**
+     * 使用广播方式设置工作日定时任务（更可靠）
+     */
+    private void setWorkdayAlarmWithBroadcast(AlarmManager alarmManager, int hour, int minute, int requestCode) {
+        // 创建广播意图
+        Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
+        broadcastIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
+        broadcastIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, AlarmReceiver.TASK_TYPE_DAILY);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this, requestCode, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        // 获取下一个工作日的指定时间
+        Calendar targetTime = WorkdayHelper.getNextWorkdayTime(hour, minute);
+        
+        // 设置每日重复的闹钟（但在AlarmReceiver中会检查是否为工作日）
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            targetTime.getTimeInMillis(),
+            AlarmManager.INTERVAL_DAY,  // 每天重复，但会在接收器中检查工作日
+            pendingIntent
+        );
+        
+        android.util.Log.i("MainActivity", String.format("设置工作日定时任务: %02d:%02d, 下次执行: %s", 
+                hour, minute, android.text.format.DateFormat.format("yyyy-MM-dd HH:mm:ss", targetTime)));
     }
 }

@@ -105,44 +105,22 @@ public class NotificationHelper {
     }
     
     /**
-     * 显示每日定时任务的通知
+     * 显示工作日定时任务的通知
      */
-    public void showDailyScheduleNotification() {
-        // 计算下次9:25或18:35的时间
-        Calendar now = Calendar.getInstance();
-        Calendar next925 = getNextScheduleTime(9, 25);
-        Calendar next1835 = getNextScheduleTime(18, 35);
-        
-        // 选择最近的一个时间
-        Calendar nextTime;
-        if (next925.getTimeInMillis() < next1835.getTimeInMillis()) {
-            nextTime = next925;
-        } else {
-            nextTime = next1835;
-        }
-        
-        showNextScheduleNotification(nextTime.getTimeInMillis(), "启动钉钉应用");
+    public void showWorkdayScheduleNotification() {
+        // 获取下次工作日定时任务时间
+        Calendar nextTime = WorkdayHelper.getNextWorkdayScheduleTime();
+        showNextScheduleNotification(nextTime.getTimeInMillis(), "启动钉钉应用（仅工作日）");
     }
     
     /**
-     * 计算指定时间的下次触发时间
+     * 显示每日定时任务的通知（保持兼容性，但实际使用工作日逻辑）
      */
-    private Calendar getNextScheduleTime(int hour, int minute) {
-        Calendar calendar = Calendar.getInstance();
-        Calendar targetTime = Calendar.getInstance();
-        
-        targetTime.set(Calendar.HOUR_OF_DAY, hour);
-        targetTime.set(Calendar.MINUTE, minute);
-        targetTime.set(Calendar.SECOND, 0);
-        targetTime.set(Calendar.MILLISECOND, 0);
-        
-        // 如果今天的指定时间已经过了，设置为明天的同一时间
-        if (targetTime.getTimeInMillis() <= calendar.getTimeInMillis()) {
-            targetTime.add(Calendar.DAY_OF_MONTH, 1);
-        }
-        
-        return targetTime;
+    public void showDailyScheduleNotification() {
+        showWorkdayScheduleNotification();
     }
+    
+
     
     /**
      * 格式化剩余时间显示

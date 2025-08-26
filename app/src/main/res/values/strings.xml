@@ -4,13 +4,14 @@
     <string name="app_name">打泥马的卡</string>
     
     <!-- 按钮文字 -->
-    <string name="btn_daily_schedule">设置钉钉定时启动\n(每日9:25和18:35)</string>
+    <string name="btn_daily_schedule">已设置工作日自动打卡\n(周一至周五 9:25和18:35)</string>
     <string name="btn_instant_start">1分钟后启动钉钉</string>
     <string name="btn_test_start">🗂️ 测试启动钉钉</string>
     
     <!-- Toast消息 -->
     <string name="toast_dingding_not_installed">❌ 未检测到钉钉应用，请先安装钉钉</string>
-    <string name="toast_daily_task_set">✅ 已设置每日定时任务：\n9:25 和 18:35 启动钉钉</string>
+    <string name="toast_workday_task_set">✅ 已设置工作日定时任务：\n周一至周五 9:25和18:35 启动钉钉</string>
+    <string name="toast_weekend_skip">🎆 今天是周末，跳过打卡任务</string>
     <string name="toast_instant_task_set">✅ 1分钟后将自动启动钉钉应用</string>
     <string name="toast_testing_start">🗂️ 正在测试启动钉钉...</string>
     <string name="toast_notification_granted">通知权限已授予</string>

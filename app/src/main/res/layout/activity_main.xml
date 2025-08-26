@@ -5,12 +5,20 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <Button
-        android:id="@+id/btn_schedule"
+    <!-- 工作日打卡状态显示 -->
+    <TextView
+        android:id="@+id/tv_workday_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/btn_daily_schedule"
-        android:layout_marginBottom="20dp"/>
+        android:textSize="16sp"
+        android:textColor="@android:color/holo_green_dark"
+        android:background="@android:color/white"
+        android:padding="16dp"
+        android:gravity="center"
+        android:layout_marginBottom="30dp"
+        android:drawableTop="@android:drawable/ic_dialog_info"
+        android:drawablePadding="8dp"/>
 
     <Button
         android:id="@+id/btn_start_dingding"

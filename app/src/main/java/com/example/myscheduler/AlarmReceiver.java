@@ -25,6 +25,13 @@ public class AlarmReceiver extends BroadcastReceiver {
             String taskType = intent.getStringExtra(EXTRA_TASK_TYPE);
             Log.d(TAG, "Task type: " + taskType);
             
+            // 检查是否为工作日（仅对每日定时任务检查）
+            if (TASK_TYPE_DAILY.equals(taskType) && WorkdayHelper.shouldSkipCurrentTask()) {
+                Log.i(TAG, "Weekend detected, skipping task");
+                showToast(context, context.getString(R.string.toast_weekend_skip));
+                return;
+            }
+            
             // 启动钉钉应用
             boolean success = startDingDingApp(context);
             
