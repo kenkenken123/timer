@@ -33,17 +33,23 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
           
-    - name: Create Gradle Wrapper if not exists
+    - name: Validate Gradle Wrapper files
       run: |
+        echo "检查Gradle Wrapper文件..."
         if [ ! -f "gradlew" ]; then
-          echo "Creating Gradle Wrapper..."
-          # Install Gradle first
-          wget https://services.gradle.org/distributions/gradle-8.0-bin.zip
-          unzip -q gradle-8.0-bin.zip
-          export PATH=$PATH:$PWD/gradle-8.0/bin
-          # Generate wrapper
-          gradle wrapper --gradle-version 8.0
+          echo "❌ gradlew文件不存在"
+          exit 1
         fi
+        if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
+          echo "❌ gradle-wrapper.jar文件不存在，正在下载..."
+          curl -L -o gradle/wrapper/gradle-wrapper.jar \
+            https://github.com/gradle/gradle/raw/v8.0.0/gradle/wrapper/gradle-wrapper.jar
+        fi
+        if [ ! -f "gradle/wrapper/gradle-wrapper.properties" ]; then
+          echo "❌ gradle-wrapper.properties文件不存在"
+          exit 1
+        fi
+        echo "✅ 所有Gradle Wrapper文件都存在"
         
     - name: Make gradlew executable
       run: chmod +x gradlew
