@@ -9,15 +9,14 @@
         android:id="@+id/btn_schedule"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="设置钉钉定时启动
-(每日9:25和18:35)"
+        android:text="@string/btn_daily_schedule"
         android:layout_marginBottom="20dp"/>
 
     <Button
         android:id="@+id/btn_start_dingding"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1分钟后启动钉钉"
+        android:text="@string/btn_instant_start"
         android:background="@android:color/holo_green_light"
         android:textColor="@android:color/white"
         android:padding="16dp"
@@ -27,7 +26,7 @@
         android:id="@+id/btn_test_dingding"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="🗋 测试启动钉钉"
+        android:text="@string/btn_test_start"
         android:background="@android:color/holo_orange_light"
         android:textColor="@android:color/white"
         android:padding="12dp"/>

@@ -20,7 +20,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="My Scheduler"
+        android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".MainActivity"
             android:exported="true">

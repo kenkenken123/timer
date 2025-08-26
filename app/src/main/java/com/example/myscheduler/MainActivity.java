@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(v -> {
             // 检查钉钉应用是否已安装
             if (!AlarmReceiver.isDingDingInstalled(this)) {
-                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.toast_dingding_not_installed), Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             // 设置每天18:35的定时任务
             setDailyAlarmWithBroadcast(alarmManager, 18, 35, 1002);
 
-            Toast.makeText(this, "✅ 已设置每日定时任务：\n9:25 和 18:35 启动钉钉", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.toast_daily_task_set), Toast.LENGTH_LONG).show();
             
             // 显示下次定时任务的通知
             notificationHelper.showDailyScheduleNotification();
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 pendingIntent
             );
 
-            Toast.makeText(this, "✅ 1分钟后将自动启动钉钉应用", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.toast_instant_task_set), Toast.LENGTH_LONG).show();
             
             // 显示即时定时任务的通知
             notificationHelper.showInstantScheduleNotification();
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             AlarmReceiver receiver = new AlarmReceiver();
             receiver.onReceive(this, testIntent);
             
-            Toast.makeText(this, "🗋 正在测试启动钉钉...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_testing_start), Toast.LENGTH_SHORT).show();
         });
     }
     
@@ -191,9 +191,9 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "通知权限已授予", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.toast_notification_granted), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "通知权限被拒绝，可能无法显示定时任务通知", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.toast_notification_denied), Toast.LENGTH_LONG).show();
             }
         }
     }

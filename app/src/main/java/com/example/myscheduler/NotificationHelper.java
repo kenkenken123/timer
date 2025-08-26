@@ -17,8 +17,6 @@ import java.util.Locale;
 public class NotificationHelper {
     
     private static final String CHANNEL_ID = "scheduler_notifications";
-    private static final String CHANNEL_NAME = "定时任务通知";
-    private static final String CHANNEL_DESCRIPTION = "显示下次定时任务的执行时间";
     private static final int NOTIFICATION_ID = 1001;
     
     private Context context;
@@ -35,12 +33,15 @@ public class NotificationHelper {
      */
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelName = context.getString(R.string.notification_channel_name);
+            String channelDescription = context.getString(R.string.notification_channel_description);
+            
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    CHANNEL_NAME,
+                    channelName,
                     NotificationManager.IMPORTANCE_DEFAULT
             );
-            channel.setDescription(CHANNEL_DESCRIPTION);
+            channel.setDescription(channelDescription);
             channel.setShowBadge(true);
             channel.enableLights(true);
             channel.enableVibration(false); // 不震动，避免打扰

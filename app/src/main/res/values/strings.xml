@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 应用名称 -->
+    <string name="app_name">打泥马的卡</string>
+    
+    <!-- 按钮文字 -->
+    <string name="btn_daily_schedule">设置钉钉定时启动\n(每日9:25和18:35)</string>
+    <string name="btn_instant_start">1分钟后启动钉钉</string>
+    <string name="btn_test_start">🗂️ 测试启动钉钉</string>
+    
+    <!-- Toast消息 -->
+    <string name="toast_dingding_not_installed">❌ 未检测到钉钉应用，请先安装钉钉</string>
+    <string name="toast_daily_task_set">✅ 已设置每日定时任务：\n9:25 和 18:35 启动钉钉</string>
+    <string name="toast_instant_task_set">✅ 1分钟后将自动启动钉钉应用</string>
+    <string name="toast_testing_start">🗂️ 正在测试启动钉钉...</string>
+    <string name="toast_notification_granted">通知权限已授予</string>
+    <string name="toast_notification_denied">通知权限被拒绝，可能无法显示定时任务通知</string>
+    
+    <!-- 通知相关 -->
+    <string name="notification_channel_name">定时任务通知</string>
+    <string name="notification_channel_description">显示下次定时任务的执行时间</string>
+    <string name="notification_next_task_title">📅 下次定时任务</string>
+    <string name="notification_foreground_title">🛡️ 定时任务保护服务</string>
+    <string name="notification_foreground_content">正在运行以确保定时任务正常执行</string>
+    <string name="notification_success_title">✅ 定时任务执行成功</string>
+    <string name="notification_failure_title">❌ 定时任务执行失败</string>
+    <string name="notification_failure_content">🚫 无法启动钉钉应用，请检查是否已安装</string>
+    
+    <!-- AlarmReceiver相关 -->
+    <string name="receiver_success_toast">✅ 钉钉应用已启动</string>
+    <string name="receiver_failure_toast">❌ 钉钉应用启动失败，请检查是否已安装</string>
+    
+    <!-- 电池优化相关 -->
+    <string name="battery_optimization_title">⚡ 电池优化设置</string>
+    <string name="battery_optimization_message">为了确保定时任务正常执行，建议将本应用加入电池优化白名单。\n\n这样可以防止系统在后台清理应用，确保定时启动钉钉功能正常工作。</string>
+    <string name="battery_goto_settings">前往设置</string>
+    <string name="battery_later">稍后再说</string>
+    <string name="autostart_title">🚀 自启动设置</string>
+    <string name="autostart_xiaomi">小米手机设置路径：\n设置 → 应用设置 → 授权管理 → 自启动管理 → 找到打泥马的卡并开启</string>
+    <string name="autostart_huawei">华为/荣耀手机设置路径：\n设置 → 应用和服务 → 应用启动管理 → 找到打泥马的卡 → 手动管理 → 开启自动启动</string>
+    <string name="autostart_oppo">OPPO手机设置路径：\n设置 → 电池 → 应用耗电管理 → 应用自启动 → 找到打泥马的卡并开启</string>
+    <string name="autostart_vivo">VIVO手机设置路径：\n设置 → 电池 → 后台应用管理 → 找到打泥马的卡 → 开启后台自启动</string>
+    <string name="autostart_meizu">魅族手机设置路径：\n设置 → 应用管理 → 权限管理 → 后台管理 → 找到打泥马的卡并允许后台运行</string>
+    <string name="autostart_samsung">三星手机设置路径：\n设置 → 应用程序 → 打泥马的卡 → 电池 → 优化电池使用 → 选择不优化</string>
+    <string name="autostart_generic">请在手机设置中找到应用管理或电池优化相关选项，将打泥马的卡添加到白名单或允许自启动，以确保定时功能正常工作。</string>
+    <string name="autostart_confirm">知道了</string>
+</resources>
