@@ -2,26 +2,28 @@ name: Android CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]   # 若你的主分支是 master，请修改成 master
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 17
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
 
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: app
-        path: app/build/outputs/apk/debug/*.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          # 默认压缩级别为 6，这里你也可以控制压缩效率
+          compression-level: 6
