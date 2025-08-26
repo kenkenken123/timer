@@ -8,17 +8,39 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import android.content.pm.PackageManager;
+import android.Manifest;
 
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
+    private NotificationHelper notificationHelper;
+    private BatteryOptimizationHelper batteryHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 初始化帮助类
+        notificationHelper = new NotificationHelper(this);
+        batteryHelper = new BatteryOptimizationHelper(this);
+        
+        // 启动前台服务保持应用运行
+        startKeepAliveService();
+        
+        // 请求通知权限
+        requestNotificationPermission();
+        
+        // 设置电池优化白名单
+        batteryHelper.setupKeepAlive(this);
+
         Button btn = findViewById(R.id.btn_schedule);
+        Button btnStartDingDing = findViewById(R.id.btn_start_dingding);
 
         btn.setOnClickListener(v -> {
             // 设置钉钉应用的包名和Activity
@@ -34,6 +56,41 @@ public class MainActivity extends AppCompatActivity {
             setDailyAlarm(alarmManager, targetPackage, targetActivity, 18, 35, 1002);
 
             Toast.makeText(this, "已设置每日定时任务：\n9:25 和 18:35 启动钉钉", Toast.LENGTH_LONG).show();
+            
+            // 显示下次定时任务的通知
+            notificationHelper.showDailyScheduleNotification();
+        });
+
+        btnStartDingDing.setOnClickListener(v -> {
+            // 设置1分钟后启动钉钉
+            String targetPackage = "com.alibaba.android.rimet";
+            String targetActivity = "com.alibaba.android.rimet.biz.SplashActivity";
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            
+            // 计算1分钟后的时间
+            Calendar targetTime = Calendar.getInstance();
+            targetTime.add(Calendar.MINUTE, 1);
+            
+            // 创建启动钉钉的Intent
+            Intent intent = new Intent();
+            intent.setClassName(targetPackage, targetActivity);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this, 2001, intent, PendingIntent.FLAG_IMMUTABLE);
+
+            // 设置一次性闹钟（1分钟后触发）
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                targetTime.getTimeInMillis(),
+                pendingIntent
+            );
+
+            Toast.makeText(this, "1分钟后将自动启动钉钉应用", Toast.LENGTH_LONG).show();
+            
+            // 显示即时定时任务的通知
+            notificationHelper.showInstantScheduleNotification();
         });
     }
     
@@ -67,5 +124,46 @@ public class MainActivity extends AppCompatActivity {
             AlarmManager.INTERVAL_DAY,  // 每天重复
             pendingIntent
         );
+    }
+    
+    /**
+     * 请求通知权限
+     */
+    private void requestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+    
+    /**
+     * 启动前台服务保持应用运行
+     */
+    private void startKeepAliveService() {
+        Intent serviceIntent = new Intent(this, SchedulerKeepAliveService.class);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+    }
+    
+    /**
+     * 处理权限请求结果
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "通知权限已授予", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "通知权限被拒绝，可能无法显示定时任务通知", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
