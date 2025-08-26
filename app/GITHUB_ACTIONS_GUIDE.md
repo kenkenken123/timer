@@ -1,14 +1,10 @@
 # GitHub Actions 构建指南
 
-## ✅ 问题已解决
+## ✅ 目录结构问题已解决
 
-**好消息！** 你的项目现在已经包含了所有必需的 Gradle Wrapper 文件：
+**问题原因**: 项目的目录结构与标准 Android 项目不同，GitHub Actions 在根目录找不到 `gradlew` 文件。
 
-- ✅ `gradlew` (Unix/Linux 脚本)
-- ✅ `gradlew.bat` (Windows 批处理文件) 
-- ✅ `gradle/wrapper/gradle-wrapper.jar` (Wrapper JAR 文件)
-- ✅ `gradle/wrapper/gradle-wrapper.properties` (配置文件)
-- ✅ `.github/workflows/android.yml` (GitHub Actions 工作流)
+**解决方案**: 已修改 GitHub Actions 工作流，添加 `working-directory: app` 指令，使所有 Gradle 操作在 app 目录中执行。
 
 ## 🚀 现在可以直接使用
 
