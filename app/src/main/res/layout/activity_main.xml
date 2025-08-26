@@ -9,5 +9,6 @@
         android:id="@+id/btn_schedule"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="定时启动应用"/>
+        android:text="设置钉钉定时启动
+(每日9:25和18:35)"/>
 </LinearLayout>
