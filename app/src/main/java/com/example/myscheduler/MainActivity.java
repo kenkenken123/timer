@@ -20,12 +20,15 @@ import androidx.appcompat.app.AlertDialog;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.view.View;
+import android.provider.Settings;
+import android.net.Uri;
 
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final int EXACT_ALARM_PERMISSION_REQUEST_CODE = 1002;
     private NotificationHelper notificationHelper;
     private BatteryOptimizationHelper batteryHelper;
     private boolean permissionRequested = false; // 添加权限请求状态标记
@@ -58,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
         mainHandler.postDelayed(() -> {
             requestNotificationPermission();
+            requestExactAlarmPermission();
             // 暂时注释掉电池优化设置，避免权限请求冲突
             // setupBatteryOptimizationLater();
         }, 1000); // 延迟1秒请求权限
@@ -128,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             NumberPicker minutePicker = new NumberPicker(this);
             minutePicker.setMinValue(1);
             minutePicker.setMaxValue(60);
-            minutePicker.setValue(1);
+            minutePicker.setValue(5);  // 默认值改为5分钟
             minutePicker.setWrapSelectorWheel(false);
             
             // 添加分钟标签
@@ -160,6 +164,13 @@ public class MainActivity extends AppCompatActivity {
      */
     private void startDelayedTask(int delayMinutes) {
         try {
+            // 检查精确闹钟权限
+            if (!checkExactAlarmPermission()) {
+                showErrorWithCopy("❌ 缺少精确闹钟权限，无法设置定时任务");
+                requestExactAlarmPermission();
+                return;
+            }
+            
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             if (alarmManager == null) {
                 showErrorWithCopy("❌ 系统闹钟服务不可用");
@@ -179,11 +190,19 @@ public class MainActivity extends AppCompatActivity {
                     this, 2001, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
 
             // 设置一次性闹钟
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                targetTime.getTimeInMillis(),
-                pendingIntent
-            );
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    targetTime.getTimeInMillis(),
+                    pendingIntent
+                );
+            } else {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    targetTime.getTimeInMillis(),
+                    pendingIntent
+                );
+            }
 
             String message = String.format("✅ %d分钟后将自动启动钉钉应用", delayMinutes);
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
@@ -278,6 +297,39 @@ public class MainActivity extends AppCompatActivity {
     }
     
     /**
+     * 请求精确闹钟权限
+     */
+    private void requestExactAlarmPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
+                android.util.Log.d("MainActivity", "需要请求精确闹钟权限");
+                try {
+                    Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivityForResult(intent, EXACT_ALARM_PERMISSION_REQUEST_CODE);
+                } catch (Exception e) {
+                    android.util.Log.e("MainActivity", "无法打开精确闹钟权限设置页面: " + e.getMessage());
+                    Toast.makeText(this, "⚠️ 请手动在设置中允许此应用设置精确闹钟", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                android.util.Log.d("MainActivity", "精确闹钟权限已经授予");
+            }
+        }
+    }
+    
+    /**
+     * 检查精确闹钟权限
+     */
+    private boolean checkExactAlarmPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            return alarmManager != null && alarmManager.canScheduleExactAlarms();
+        }
+        return true; // Android 12 以下不需要此权限
+    }
+    
+    /**
      * 启动前台服务保持应用运行
      */
     private void startKeepAliveService() {
@@ -312,6 +364,23 @@ public class MainActivity extends AppCompatActivity {
                 android.util.Log.d("MainActivity", "通知权限被拒绝");
                 Toast.makeText(this, "⚠️ 通知权限被拒绝，可能无法显示定时任务通知", Toast.LENGTH_LONG).show();
                 // 即使权限被拒绝，也不再重复请求其他权限
+            }
+        }
+    }
+    
+    /**
+     * 处理活动结果（用于处理精确闹钟权限设置）
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == EXACT_ALARM_PERMISSION_REQUEST_CODE) {
+            if (checkExactAlarmPermission()) {
+                android.util.Log.d("MainActivity", "精确闹钟权限已授予");
+                Toast.makeText(this, "✅ 精确闹钟权限已授予。现在可以设置定时任务了！", Toast.LENGTH_LONG).show();
+            } else {
+                android.util.Log.d("MainActivity", "精确闹钟权限仍未授予");
+                Toast.makeText(this, "⚠️ 精确闹钟权限未授予，无法设置定时任务", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -392,6 +461,12 @@ public class MainActivity extends AppCompatActivity {
      * 使用广播方式设置工作日定时任务（更可靠）
      */
     private void setWorkdayAlarmWithBroadcast(AlarmManager alarmManager, int hour, int minute, int requestCode) {
+        // 检查精确闹钟权限
+        if (!checkExactAlarmPermission()) {
+            android.util.Log.w("MainActivity", "缺少精确闹钟权限，跳过设置工作日定时任务");
+            return;
+        }
+        
         // 创建广播意图
         Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
         broadcastIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
