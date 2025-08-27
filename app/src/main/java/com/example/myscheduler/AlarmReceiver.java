@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.util.Log;
 import android.widget.Toast;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import java.util.List;
 import java.util.Calendar;
 
@@ -51,8 +53,9 @@ public class AlarmReceiver extends BroadcastReceiver {
                 NotificationHelper notificationHelper = new NotificationHelper(context);
                 notificationHelper.showExecutionSuccessNotification(taskType);
             } else {
+                String errorMsg = "❌ 钉钉应用启动失败，请检查是否已安装";
                 Log.e(TAG, "钉钉应用启动失败");
-                showToast(context, "❌ 钉钉应用启动失败，请检查是否已安装");
+                showToastWithCopy(context, errorMsg);
                 
                 // 发送失败通知
                 NotificationHelper notificationHelper = new NotificationHelper(context);
@@ -63,6 +66,10 @@ public class AlarmReceiver extends BroadcastReceiver {
             if (TASK_TYPE_DAILY.equals(taskType)) {
                 rescheduleNextWorkdayTask(context, intent);
             }
+        } catch (Exception e) {
+            String errorMsg = "❌ AlarmReceiver处理异常: " + e.getMessage();
+            Log.e(TAG, "AlarmReceiver处理异常: " + e.getMessage(), e);
+            showToastWithCopy(context, errorMsg);
         }
     }
     
@@ -105,7 +112,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                 return true;
             }
         } catch (Exception e) {
-            Log.w(TAG, "包名启动失败: " + packageName + ", 错误: " + e.getMessage());
+            String errorMsg = "❌ 包名启动失败: " + packageName + ", 错误: " + e.getMessage();
+            Log.w(TAG, errorMsg);
         }
         return false;
     }
@@ -142,7 +150,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Intent动作启动失败: " + e.getMessage());
+            String errorMsg = "❌ Intent动作启动失败: " + e.getMessage();
+            Log.e(TAG, errorMsg);
         }
         return false;
     }
@@ -158,6 +167,33 @@ public class AlarmReceiver extends BroadcastReceiver {
             context.startService(toastIntent);
         } catch (Exception e) {
             Log.e(TAG, "显示Toast失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 显示Toast消息并复制到剪贴板
+     */
+    private void showToastWithCopy(Context context, String message) {
+        try {
+            // 显示Toast
+            showToast(context, message);
+            
+            // 复制错误信息到剪贴板
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                ClipData clip = ClipData.newPlainText("错误信息", message);
+                clipboard.setPrimaryClip(clip);
+                
+                // 延迟显示复制成功的提示
+                android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+                handler.postDelayed(() -> {
+                    showToast(context, "📋 错误信息已复制到剪贴板");
+                }, 1500);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "显示错误信息失败: " + e.getMessage());
+            // 如果复制失败，至少显示原始错误
+            showToast(context, message);
         }
     }
     
@@ -213,7 +249,8 @@ public class AlarmReceiver extends BroadcastReceiver {
             notificationHelper.showDailyScheduleNotification();
             
         } catch (Exception e) {
-            Log.e(TAG, "重新设置定时任务失败: " + e.getMessage(), e);
+            String errorMsg = "❌ 重新设置定时任务失败: " + e.getMessage();
+            Log.e(TAG, errorMsg, e);
         }
     }
 

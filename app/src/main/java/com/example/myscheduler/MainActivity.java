@@ -13,6 +13,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.content.pm.PackageManager;
 import android.Manifest;
+import android.app.TimePickerDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import androidx.appcompat.app.AlertDialog;
+import android.widget.NumberPicker;
+import android.widget.TextView;
+import android.view.View;
 
 import java.util.Calendar;
 
@@ -75,8 +82,8 @@ public class MainActivity extends AppCompatActivity {
         
         // 设置按钮点击事件
         btnStartDingDing.setOnClickListener(v -> {
-            android.util.Log.d("MainActivity", "点击1分钟启动按钮");
-            start1MinuteTask();
+            android.util.Log.d("MainActivity", "点击定时启动按钮");
+            showTimeSelectionDialog();
         });
         
         btnTestDingDing.setOnClickListener(v -> {
@@ -92,25 +99,76 @@ public class MainActivity extends AppCompatActivity {
     }
     
     /**
-     * 启动1分钟后的定时任务
+     * 显示时间选择对话框
      */
-    private void start1MinuteTask() {
+    private void showTimeSelectionDialog() {
         try {
             // 检查钉钉应用是否已安装
             if (!AlarmReceiver.isDingDingInstalled(this)) {
-                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
+                showErrorWithCopy("❌ 未检测到钉钉应用，请先安装钉钉");
                 return;
             }
 
+            // 创建自定义的时间选择对话框
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            View dialogView = getLayoutInflater().inflate(android.R.layout.simple_list_item_2, null);
+            
+            // 创建简单的时间选择界面
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setPadding(50, 50, 50, 50);
+            
+            TextView titleText = new TextView(this);
+            titleText.setText("选择延迟启动时间");
+            titleText.setTextSize(18);
+            titleText.setPadding(0, 0, 0, 30);
+            layout.addView(titleText);
+            
+            // 分钟选择器
+            NumberPicker minutePicker = new NumberPicker(this);
+            minutePicker.setMinValue(1);
+            minutePicker.setMaxValue(60);
+            minutePicker.setValue(1);
+            minutePicker.setWrapSelectorWheel(false);
+            
+            // 添加分钟标签
+            TextView minuteLabel = new TextView(this);
+            minuteLabel.setText("分钟后启动钉钉");
+            minuteLabel.setTextSize(16);
+            minuteLabel.setPadding(0, 20, 0, 0);
+            
+            layout.addView(minutePicker);
+            layout.addView(minuteLabel);
+            
+            builder.setView(layout)
+                .setTitle("定时启动钉钉")
+                .setPositiveButton("确定", (dialog, which) -> {
+                    int selectedMinutes = minutePicker.getValue();
+                    startDelayedTask(selectedMinutes);
+                })
+                .setNegativeButton("取消", null)
+                .show();
+                
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "显示时间选择对话框失败: " + e.getMessage());
+            showErrorWithCopy("❌ 对话框显示失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 启动延迟定时任务
+     */
+    private void startDelayedTask(int delayMinutes) {
+        try {
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             if (alarmManager == null) {
-                Toast.makeText(this, "❌ 系统闹钟服务不可用", Toast.LENGTH_LONG).show();
+                showErrorWithCopy("❌ 系统闹钟服务不可用");
                 return;
             }
             
-            // 计算1分钟后的时间
+            // 计算延迟时间
             Calendar targetTime = Calendar.getInstance();
-            targetTime.add(Calendar.MINUTE, 1);
+            targetTime.add(Calendar.MINUTE, delayMinutes);
             
             // 创建广播意图
             Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
@@ -120,22 +178,50 @@ public class MainActivity extends AppCompatActivity {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     this, 2001, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
 
-            // 设置一次性闹钟（1分钟后触发）
+            // 设置一次性闹钟
             alarmManager.setExact(
                 AlarmManager.RTC_WAKEUP,
                 targetTime.getTimeInMillis(),
                 pendingIntent
             );
 
-            Toast.makeText(this, "✅ 1分钟后将自动启动钉钉应用", Toast.LENGTH_LONG).show();
+            String message = String.format("✅ %d分钟后将自动启动钉钉应用", delayMinutes);
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             
             // 显示即时定时任务的通知
             if (notificationHelper != null) {
                 notificationHelper.showInstantScheduleNotification();
             }
         } catch (Exception e) {
-            android.util.Log.e("MainActivity", "1分钟任务设置失败: " + e.getMessage());
-            Toast.makeText(this, "❌ 设置失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            android.util.Log.e("MainActivity", "延迟任务设置失败: " + e.getMessage());
+            showErrorWithCopy("❌ 设置失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 显示错误信息并提供复制到剪贴板功能
+     */
+    private void showErrorWithCopy(String errorMessage) {
+        try {
+            // 显示Toast
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+            
+            // 复制错误信息到剪贴板
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard != null) {
+                ClipData clip = ClipData.newPlainText("错误信息", errorMessage);
+                clipboard.setPrimaryClip(clip);
+                
+                // 延迟显示复制成功的提示
+                android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+                handler.postDelayed(() -> {
+                    Toast.makeText(this, "📋 错误信息已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                }, 1500);
+            }
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "显示错误信息失败: " + e.getMessage());
+            // 如果复制失败，至少显示原始错误
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
     }
     
@@ -161,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "🗂️ 正在测试启动钉钉...", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             android.util.Log.e("MainActivity", "测试启动失败: " + e.getMessage());
-            Toast.makeText(this, "❌ 测试失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            showErrorWithCopy("❌ 测试失败: " + e.getMessage());
         }
     }
 
@@ -279,6 +365,91 @@ public class MainActivity extends AppCompatActivity {
             if (alarmManager == null) {
                 android.util.Log.e("MainActivity", "AlarmManager服务不可用");
                 return;
+            }
+            
+            // 先取消已有的定时任务，避免重复设置
+            cancelExistingAlarms(alarmManager);
+            
+            // 设置工作日上班打卡：9:25
+            setWorkdayAlarmWithBroadcast(alarmManager, 9, 25, 1001);
+            
+            // 设置工作日下班打卡：18:35
+            setWorkdayAlarmWithBroadcast(alarmManager, 18, 35, 1002);
+
+            android.util.Log.i("MainActivity", "已自动设置工作日定时任务：9:25和18:35");
+            
+            // 显示下次定时任务的通知
+            if (notificationHelper != null) {
+                notificationHelper.showDailyScheduleNotification();
+            }
+            
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "设置工作日定时任务失败: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * 使用广播方式设置工作日定时任务（更可靠）
+     */
+    private void setWorkdayAlarmWithBroadcast(AlarmManager alarmManager, int hour, int minute, int requestCode) {
+        // 创建广播意图
+        Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
+        broadcastIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
+        broadcastIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, AlarmReceiver.TASK_TYPE_DAILY);
+        broadcastIntent.putExtra(AlarmReceiver.EXTRA_HOUR, hour);
+        broadcastIntent.putExtra(AlarmReceiver.EXTRA_MINUTE, minute);
+        broadcastIntent.putExtra(AlarmReceiver.EXTRA_REQUEST_CODE, requestCode);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this, requestCode, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        // 获取下一个工作日的指定时间
+        Calendar targetTime = WorkdayHelper.getNextWorkdayTime(hour, minute);
+        
+        // 使用精确且允许在休眠时执行的定时任务（更可靠）
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                targetTime.getTimeInMillis(),
+                pendingIntent
+            );
+        } else {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                targetTime.getTimeInMillis(),
+                pendingIntent
+            );
+        }
+        
+        android.util.Log.i("MainActivity", String.format("设置工作日定时任务: %02d:%02d, 下次执行: %s", 
+                hour, minute, android.text.format.DateFormat.format("yyyy-MM-dd HH:mm:ss", targetTime)));
+    }
+    
+    /**
+     * 取消已有的定时任务
+     */
+    private void cancelExistingAlarms(AlarmManager alarmManager) {
+        try {
+            // 取消9:25的定时任务
+            Intent intent1 = new Intent(this, AlarmReceiver.class);
+            intent1.setAction(AlarmReceiver.ACTION_START_DINGDING);
+            PendingIntent pendingIntent1 = PendingIntent.getBroadcast(
+                    this, 1001, intent1, PendingIntent.FLAG_IMMUTABLE);
+            alarmManager.cancel(pendingIntent1);
+            
+            // 取消18:35的定时任务
+            Intent intent2 = new Intent(this, AlarmReceiver.class);
+            intent2.setAction(AlarmReceiver.ACTION_START_DINGDING);
+            PendingIntent pendingIntent2 = PendingIntent.getBroadcast(
+                    this, 1002, intent2, PendingIntent.FLAG_IMMUTABLE);
+            alarmManager.cancel(pendingIntent2);
+            
+            android.util.Log.i("MainActivity", "已取消已有的定时任务");
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "取消定时任务失败: " + e.getMessage());
+        }
+    }
+}
             }
             
             // 先取消已有的定时任务，避免重复设置

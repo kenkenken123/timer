@@ -112,7 +112,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1分钟启动"
+                    android:text="定时启动"
                     android:textSize="12sp"
                     android:textColor="#FFFFFF"
                     android:gravity="center" />
