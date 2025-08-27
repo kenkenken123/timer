@@ -25,26 +25,18 @@
         android:pathData="M50,30 L52,25 L48,25 Z"/>
     
     <!-- 独角兽眼睛 -->
-    <circle
+    <path
         android:fillColor="#FFFFFF"
-        android:cx="47"
-        android:cy="40"
-        android:radius="2"/>
-    <circle
+        android:pathData="M45,40 A2,2 0 1,1 49,40 A2,2 0 1,1 45,40"/>
+    <path
         android:fillColor="#FFFFFF"
-        android:cx="53"
-        android:cy="40"
-        android:radius="2"/>
-    <circle
+        android:pathData="M51,40 A2,2 0 1,1 55,40 A2,2 0 1,1 51,40"/>
+    <path
         android:fillColor="#000000"
-        android:cx="47"
-        android:cy="40"
-        android:radius="1"/>
-    <circle
+        android:pathData="M46,40 A1,1 0 1,1 48,40 A1,1 0 1,1 46,40"/>
+    <path
         android:fillColor="#000000"
-        android:cx="53"
-        android:cy="40"
-        android:radius="1"/>
+        android:pathData="M52,40 A1,1 0 1,1 54,40 A1,1 0 1,1 52,40"/>
     
     <!-- 鬃毛 -->
     <path
@@ -55,85 +47,47 @@
         android:pathData="M55,32 Q60,28 58,35 Q56,32 55,32"/>
     
     <!-- 手机/平板 -->
-    <rect
+    <path
         android:fillColor="#FFFFFF"
-        android:x="58"
-        android:y="38"
-        android:width="12"
-        android:height="16"
-        android:rx="2"/>
-    <rect
+        android:pathData="M58,38 Q58,36 60,36 L68,36 Q70,36 70,38 L70,52 Q70,54 68,54 L60,54 Q58,54 58,52 Z"/>
+    <path
         android:fillColor="#E84393"
-        android:x="60"
-        android:y="40"
-        android:width="8"
-        android:height="1"/>
+        android:pathData="M60,40 L68,40 L68,41 L60,41 Z"/>
     <path
         android:fillColor="#74D680"
         android:pathData="M62,44 L68,44 L65,48 Z"/>
-    <rect
+    <path
         android:fillColor="#E84393"
-        android:x="60"
-        android:y="50"
-        android:width="8"
-        android:height="1"/>
+        android:pathData="M60,50 L68,50 L68,51 L60,51 Z"/>
     
     <!-- 日历图标 -->
-    <rect
+    <path
         android:fillColor="#FFFFFF"
-        android:x="38"
-        android:y="65"
-        android:width="20"
-        android:height="16"
-        android:rx="2"/>
-    <rect
+        android:pathData="M38,65 Q38,63 40,63 L56,63 Q58,63 58,65 L58,79 Q58,81 56,81 L40,81 Q38,81 38,79 Z"/>
+    <path
         android:fillColor="#E84393"
-        android:x="40"
-        android:y="67"
-        android:width="16"
-        android:height="2"/>
-    <rect
+        android:pathData="M40,67 L56,67 L56,69 L40,69 Z"/>
+    <path
         android:fillColor="#E84393"
-        android:x="42"
-        android:y="71"
-        android:width="2"
-        android:height="2"/>
-    <rect
+        android:pathData="M42,71 L44,71 L44,73 L42,73 Z"/>
+    <path
         android:fillColor="#E84393"
-        android:x="46"
-        android:y="71"
-        android:width="2"
-        android:height="2"/>
-    <rect
+        android:pathData="M46,71 L48,71 L48,73 L46,73 Z"/>
+    <path
         android:fillColor="#E84393"
-        android:x="50"
-        android:y="71"
-        android:width="2"
-        android:height="2"/>
-    <rect
+        android:pathData="M50,71 L52,71 L52,73 L50,73 Z"/>
+    <path
         android:fillColor="#E84393"
-        android:x="54"
-        android:y="71"
-        android:width="2"
-        android:height="2"/>
-    <rect
+        android:pathData="M54,71 L56,71 L56,73 L54,73 Z"/>
+    <path
         android:fillColor="#E84393"
-        android:x="42"
-        android:y="75"
-        android:width="2"
-        android:height="2"/>
-    <rect
+        android:pathData="M42,75 L44,75 L44,77 L42,77 Z"/>
+    <path
         android:fillColor="#74D680"
-        android:x="46"
-        android:y="75"
-        android:width="2"
-        android:height="2"/>
-    <rect
+        android:pathData="M46,75 L48,75 L48,77 L46,77 Z"/>
+    <path
         android:fillColor="#E84393"
-        android:x="50"
-        android:y="75"
-        android:width="2"
-        android:height="2"/>
+        android:pathData="M50,75 L52,75 L52,77 L50,77 Z"/>
     
     <!-- 装饰星星 -->
     <path
