@@ -20,30 +20,149 @@ public class MainActivity extends AppCompatActivity {
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
     private NotificationHelper notificationHelper;
     private BatteryOptimizationHelper batteryHelper;
+    private boolean permissionRequested = false; // 添加权限请求状态标记
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 初始化帮助类
-        notificationHelper = new NotificationHelper(this);
-        batteryHelper = new BatteryOptimizationHelper(this);
+        android.util.Log.d("MainActivity", "开始初始化 MainActivity");
         
-        // 启动前台服务保持应用运行
-        startKeepAliveService();
+        // 安全地初始化帮助类
+        try {
+            notificationHelper = new NotificationHelper(this);
+            android.util.Log.d("MainActivity", "NotificationHelper 初始化成功");
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "NotificationHelper 初始化失败: " + e.getMessage());
+            notificationHelper = null;
+        }
         
-        // 请求通知权限
-        requestNotificationPermission();
+        try {
+            batteryHelper = new BatteryOptimizationHelper(this);
+            android.util.Log.d("MainActivity", "BatteryOptimizationHelper 初始化成功");
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "BatteryOptimizationHelper 初始化失败: " + e.getMessage());
+            batteryHelper = null;
+        }
         
-        // 设置电池优化白名单
-        batteryHelper.setupKeepAlive(this);
-
+        // 延迟请求权限，避免启动时的权限请求循环
+        android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        mainHandler.postDelayed(() -> {
+            requestNotificationPermission();
+            // 暂时注释掉电池优化设置，避免权限请求冲突
+            // setupBatteryOptimizationLater();
+        }, 1000); // 延迟1秒请求权限
+        
+        // 初始化UI组件
+        initializeUI();
+        
+        android.util.Log.d("MainActivity", "MainActivity 初始化完成");
+    }
+    
+    /**
+     * 初始化UI组件
+     */
+    private void initializeUI() {
         Button btnStartDingDing = findViewById(R.id.btn_start_dingding);
         Button btnTestDingDing = findViewById(R.id.btn_test_dingding);
         
-        // 自动设置工作日定时任务
-        setupWorkdaySchedule();
+        if (btnStartDingDing == null || btnTestDingDing == null) {
+            android.util.Log.e("MainActivity", "无法找到按钮控件");
+            return;
+        }
+        
+        // 设置按钮点击事件
+        btnStartDingDing.setOnClickListener(v -> {
+            android.util.Log.d("MainActivity", "点击1分钟启动按钮");
+            start1MinuteTask();
+        });
+        
+        btnTestDingDing.setOnClickListener(v -> {
+            android.util.Log.d("MainActivity", "点击测试按钮");
+            testStartDingDing();
+        });
+        
+        // 延迟设置工作日定时任务，避免启动时的权限问题
+        android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        mainHandler.postDelayed(() -> {
+            setupWorkdaySchedule();
+        }, 2000); // 延迟2秒设置定时任务
+    }
+    
+    /**
+     * 启动1分钟后的定时任务
+     */
+    private void start1MinuteTask() {
+        try {
+            // 检查钉钉应用是否已安装
+            if (!AlarmReceiver.isDingDingInstalled(this)) {
+                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager == null) {
+                Toast.makeText(this, "❌ 系统闹钟服务不可用", Toast.LENGTH_LONG).show();
+                return;
+            }
+            
+            // 计算1分钟后的时间
+            Calendar targetTime = Calendar.getInstance();
+            targetTime.add(Calendar.MINUTE, 1);
+            
+            // 创建广播意图
+            Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
+            broadcastIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
+            broadcastIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, AlarmReceiver.TASK_TYPE_INSTANT);
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    this, 2001, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
+
+            // 设置一次性闹钟（1分钟后触发）
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                targetTime.getTimeInMillis(),
+                pendingIntent
+            );
+
+            Toast.makeText(this, "✅ 1分钟后将自动启动钉钉应用", Toast.LENGTH_LONG).show();
+            
+            // 显示即时定时任务的通知
+            if (notificationHelper != null) {
+                notificationHelper.showInstantScheduleNotification();
+            }
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "1分钟任务设置失败: " + e.getMessage());
+            Toast.makeText(this, "❌ 设置失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    /**
+     * 测试启动钉钉
+     */
+    private void testStartDingDing() {
+        try {
+            // 检查钉钉应用是否已安装
+            if (!AlarmReceiver.isDingDingInstalled(this)) {
+                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
+                return;
+            }
+            
+            // 直接调用AlarmReceiver的逻辑来测试启动
+            Intent testIntent = new Intent(this, AlarmReceiver.class);
+            testIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
+            testIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, "test");
+            
+            AlarmReceiver receiver = new AlarmReceiver();
+            receiver.onReceive(this, testIntent);
+            
+            Toast.makeText(this, "🗂️ 正在测试启动钉钉...", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "测试启动失败: " + e.getMessage());
+            Toast.makeText(this, "❌ 测试失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
 
 btnStartDingDing.setOnClickListener(v -> {
             // 检查钉钉应用是否已安装
@@ -104,13 +223,25 @@ btnStartDingDing.setOnClickListener(v -> {
      * 请求通知权限
      */
     private void requestNotificationPermission() {
+        // 避免重复请求权限
+        if (permissionRequested) {
+            android.util.Log.d("MainActivity", "权限已经请求过，跳过");
+            return;
+        }
+        
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
+                permissionRequested = true;
+                android.util.Log.d("MainActivity", "请求通知权限");
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.POST_NOTIFICATIONS},
                         NOTIFICATION_PERMISSION_REQUEST_CODE);
+            } else {
+                android.util.Log.d("MainActivity", "通知权限已经授予");
             }
+        } else {
+            android.util.Log.d("MainActivity", "Android版本低于13，无需请求通知权限");
         }
     }
     
@@ -134,10 +265,54 @@ btnStartDingDing.setOnClickListener(v -> {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, getString(R.string.toast_notification_granted), Toast.LENGTH_SHORT).show();
+                android.util.Log.d("MainActivity", "通知权限被授予");
+                Toast.makeText(this, "✅ 通知权限已授予", Toast.LENGTH_SHORT).show();
+                
+                // 权限授予后，尝试启动前台服务
+                startKeepAliveServiceSafely();
+                
+                // 延迟设置电池优化，避免多个权限请求冲突
+                android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+                handler.postDelayed(() -> {
+                    setupBatteryOptimizationLater();
+                }, 3000); // 延迟3秒
             } else {
-                Toast.makeText(this, getString(R.string.toast_notification_denied), Toast.LENGTH_LONG).show();
+                android.util.Log.d("MainActivity", "通知权限被拒绝");
+                Toast.makeText(this, "⚠️ 通知权限被拒绝，可能无法显示定时任务通知", Toast.LENGTH_LONG).show();
+                // 即使权限被拒绝，也不再重复请求其他权限
             }
+        }
+    }
+    
+    /**
+     * 安全地启动前台服务
+     */
+    private void startKeepAliveServiceSafely() {
+        try {
+            Intent serviceIntent = new Intent(this, SchedulerKeepAliveService.class);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+            android.util.Log.d("MainActivity", "前台服务启动成功");
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "前台服务启动失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 延迟设置电池优化，避免权限请求冲突
+     */
+    private void setupBatteryOptimizationLater() {
+        try {
+            if (batteryHelper != null && !batteryHelper.isIgnoringBatteryOptimizations()) {
+                android.util.Log.d("MainActivity", "尝试设置电池优化白名单");
+                // 不直接调用setupKeepAlive，而是显示一个提示
+                Toast.makeText(this, "⚠️ 建议将应用加入电池优化白名单，点击按钮设置", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "电池优化设置失败: " + e.getMessage());
         }
     }
     
@@ -145,27 +320,40 @@ btnStartDingDing.setOnClickListener(v -> {
      * 自动设置工作日定时任务
      */
     private void setupWorkdaySchedule() {
-        // 检查钉钉应用是否已安装
-        if (!AlarmReceiver.isDingDingInstalled(this)) {
-            android.util.Log.w("MainActivity", "钉钉应用未安装，跳过设置定时任务");
-            return;
+        try {
+            android.util.Log.d("MainActivity", "开始设置工作日定时任务");
+            
+            // 检查钉钉应用是否已安装
+            if (!AlarmReceiver.isDingDingInstalled(this)) {
+                android.util.Log.w("MainActivity", "钉钉应用未安装，跳过设置定时任务");
+                return;
+            }
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager == null) {
+                android.util.Log.e("MainActivity", "AlarmManager服务不可用");
+                return;
+            }
+            
+            // 先取消已有的定时任务，避免重复设置
+            cancelExistingAlarms(alarmManager);
+            
+            // 设置工作日上班打卡：9:25
+            setWorkdayAlarmWithBroadcast(alarmManager, 9, 25, 1001);
+            
+            // 设置工作日下班打卡：18:35
+            setWorkdayAlarmWithBroadcast(alarmManager, 18, 35, 1002);
+
+            android.util.Log.i("MainActivity", "已自动设置工作日定时任务：9:25和18:35");
+            
+            // 显示下次定时任务的通知
+            if (notificationHelper != null) {
+                notificationHelper.showDailyScheduleNotification();
+            }
+            
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "设置工作日定时任务失败: " + e.getMessage(), e);
         }
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        
-        // 先取消已有的定时任务，避免重复设置
-        cancelExistingAlarms(alarmManager);
-        
-        // 设置工作日上班打卡：9:25
-        setWorkdayAlarmWithBroadcast(alarmManager, 9, 25, 1001);
-        
-        // 设置工作日下班打卡：18:35
-        setWorkdayAlarmWithBroadcast(alarmManager, 18, 35, 1002);
-
-        android.util.Log.i("MainActivity", "已自动设置工作日定时任务：9:25和18:35");
-        
-        // 显示下次定时任务的通知
-        notificationHelper.showDailyScheduleNotification();
     }
     
     /**
