@@ -1,0 +1,45 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- 渐变背景 -->
+    <path
+        android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor" xmlns:aapt="http://schemas.android.com/aapt">
+            <gradient
+                android:startY="0"
+                android:endY="108"
+                android:type="linear">
+                <item
+                    android:offset="0"
+                    android:color="#87CEEB"/>
+                <item
+                    android:offset="0.5"
+                    android:color="#B8E6F0"/>
+                <item
+                    android:offset="1"
+                    android:color="#98FB98"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+    
+    <!-- 装饰云朵 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.6"
+        android:pathData="M15,20 Q12,18 15,15 Q18,12 22,15 Q25,12 28,15 Q30,18 28,20 Q25,22 22,20 Q18,22 15,20 Z"/>
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4"
+        android:pathData="M75,25 Q72,23 75,20 Q78,17 82,20 Q85,17 88,20 Q90,23 88,25 Q85,27 82,25 Q78,27 75,25 Z"/>
+    
+    <!-- 装饰草地 -->
+    <path
+        android:fillColor="#90EE90"
+        android:fillAlpha="0.3"
+        android:pathData="M0,85 Q20,80 40,85 Q60,80 80,85 Q90,80 108,85 L108,108 L0,108 Z"/>
+</vector>

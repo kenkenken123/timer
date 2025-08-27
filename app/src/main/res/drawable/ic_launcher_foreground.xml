@@ -1,0 +1,162 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- 背景渐变 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M0,0h108v108h-108z"/>
+    
+    <!-- 主背景卡片 -->
+    <path
+        android:fillColor="#B8E6F0"
+        android:pathData="M18,18 Q18,12 24,12 L84,12 Q90,12 90,18 L90,78 Q90,84 84,84 L24,84 Q18,84 18,78 Z"/>
+    
+    <!-- 独角兽主体 -->
+    <path
+        android:fillColor="#D8B4E8"
+        android:pathData="M45,35 Q50,30 55,35 Q58,38 58,42 Q58,48 55,52 Q50,56 45,52 Q42,48 42,42 Q42,38 45,35 Z"/>
+    
+    <!-- 独角兽角 -->
+    <path
+        android:fillColor="#E6C2F0"
+        android:pathData="M50,30 L52,25 L48,25 Z"/>
+    
+    <!-- 独角兽眼睛 -->
+    <circle
+        android:fillColor="#FFFFFF"
+        android:cx="47"
+        android:cy="40"
+        android:radius="2"/>
+    <circle
+        android:fillColor="#FFFFFF"
+        android:cx="53"
+        android:cy="40"
+        android:radius="2"/>
+    <circle
+        android:fillColor="#000000"
+        android:cx="47"
+        android:cy="40"
+        android:radius="1"/>
+    <circle
+        android:fillColor="#000000"
+        android:cx="53"
+        android:cy="40"
+        android:radius="1"/>
+    
+    <!-- 鬃毛 -->
+    <path
+        android:fillColor="#4A3B8C"
+        android:pathData="M45,32 Q40,28 42,35 Q44,32 45,32"/>
+    <path
+        android:fillColor="#E84393"
+        android:pathData="M55,32 Q60,28 58,35 Q56,32 55,32"/>
+    
+    <!-- 手机/平板 -->
+    <rect
+        android:fillColor="#FFFFFF"
+        android:x="58"
+        android:y="38"
+        android:width="12"
+        android:height="16"
+        android:rx="2"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="60"
+        android:y="40"
+        android:width="8"
+        android:height="1"/>
+    <path
+        android:fillColor="#74D680"
+        android:pathData="M62,44 L68,44 L65,48 Z"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="60"
+        android:y="50"
+        android:width="8"
+        android:height="1"/>
+    
+    <!-- 日历图标 -->
+    <rect
+        android:fillColor="#FFFFFF"
+        android:x="38"
+        android:y="65"
+        android:width="20"
+        android:height="16"
+        android:rx="2"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="40"
+        android:y="67"
+        android:width="16"
+        android:height="2"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="42"
+        android:y="71"
+        android:width="2"
+        android:height="2"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="46"
+        android:y="71"
+        android:width="2"
+        android:height="2"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="50"
+        android:y="71"
+        android:width="2"
+        android:height="2"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="54"
+        android:y="71"
+        android:width="2"
+        android:height="2"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="42"
+        android:y="75"
+        android:width="2"
+        android:height="2"/>
+    <rect
+        android:fillColor="#74D680"
+        android:x="46"
+        android:y="75"
+        android:width="2"
+        android:height="2"/>
+    <rect
+        android:fillColor="#E84393"
+        android:x="50"
+        android:y="75"
+        android:width="2"
+        android:height="2"/>
+    
+    <!-- 装饰星星 -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M30,25 L31,27 L33,27 L31.5,28.5 L32,30.5 L30,29 L28,30.5 L28.5,28.5 L27,27 L29,27 Z"/>
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M75,50 L76,52 L78,52 L76.5,53.5 L77,55.5 L75,54 L73,55.5 L73.5,53.5 L72,52 L74,52 Z"/>
+    
+    <!-- 彩虹装饰 -->
+    <path
+        android:fillColor="#E84393"
+        android:strokeWidth="1"
+        android:strokeColor="#E84393"
+        android:pathData="M35,60 Q43,56 51,60"/>
+    <path
+        android:fillColor="#FFD700"
+        android:strokeWidth="1"
+        android:strokeColor="#FFD700"
+        android:pathData="M36,62 Q43,58 50,62"/>
+    <path
+        android:fillColor="#74D680"
+        android:strokeWidth="1"
+        android:strokeColor="#74D680"
+        android:pathData="M37,64 Q43,60 49,64"/>
+</vector>
