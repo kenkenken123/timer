@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -64,8 +65,8 @@ public class MainActivity extends AppCompatActivity {
      * 初始化UI组件
      */
     private void initializeUI() {
-        Button btnStartDingDing = findViewById(R.id.btn_start_dingding);
-        Button btnTestDingDing = findViewById(R.id.btn_test_dingding);
+        LinearLayout btnStartDingDing = findViewById(R.id.btn_start_dingding);
+        LinearLayout btnTestDingDing = findViewById(R.id.btn_test_dingding);
         
         if (btnStartDingDing == null || btnTestDingDing == null) {
             android.util.Log.e("MainActivity", "无法找到按钮控件");

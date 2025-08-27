@@ -4,9 +4,9 @@
     <string name="app_name">打泥马的卡</string>
     
     <!-- 按钮文字 -->
-    <string name="btn_daily_schedule">已设置工作日自动打卡\n(周一至周五 9:25和18:35)</string>
+    <string name="btn_daily_schedule">工作日自动打卡已开启\n每日 9:25 和 18:35 自动启动钉钉</string>
     <string name="btn_instant_start">1分钟后启动钉钉</string>
-    <string name="btn_test_start">🗂️ 测试启动钉钉</string>
+    <string name="btn_test_start">测试启动钉钉</string>
     
     <!-- Toast消息 -->
     <string name="toast_dingding_not_installed">❌ 未检测到钉钉应用，请先安装钉钉</string>

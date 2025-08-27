@@ -1,41 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center">
+    android:background="@drawable/gradient_background">
 
-    <!-- 工作日打卡状态显示 -->
-    <TextView
-        android:id="@+id/tv_workday_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_daily_schedule"
-        android:textSize="16sp"
-        android:textColor="@android:color/holo_green_dark"
-        android:background="@android:color/white"
-        android:padding="16dp"
-        android:gravity="center"
-        android:layout_marginBottom="30dp"
-        android:drawableTop="@android:drawable/ic_dialog_info"
-        android:drawablePadding="8dp"/>
+    <!-- 渐变装饰星星 -->
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="120dp"
+        android:src="@drawable/ic_star"
+        android:alpha="0.3" />
 
-    <Button
-        android:id="@+id/btn_start_dingding"
-        android:layout_width="wrap_content"
+    <!-- 主卡片容器 -->
+    <LinearLayout
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
-        android:text="@string/btn_instant_start"
-        android:background="@android:color/holo_green_light"
-        android:textColor="@android:color/white"
-        android:padding="16dp"
-        android:layout_marginBottom="20dp"/>
+        android:layout_centerInParent="true"
+        android:background="@drawable/glass_card_background"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:elevation="8dp">
 
-    <Button
-        android:id="@+id/btn_test_dingding"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_test_start"
-        android:background="@android:color/holo_orange_light"
-        android:textColor="@android:color/white"
-        android:padding="12dp"/>
-</LinearLayout>
+        <!-- 标题区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="打卡助手"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Feature"
+                android:textSize="16sp"
+                android:textColor="#B3FFFFFF"
+                android:fontFamily="sans-serif-light" />
+
+        </LinearLayout>
+
+        <!-- 功能按钮区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
+
+            <!-- 状态显示按钮 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/feature_button_background"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_schedule"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tv_workday_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="定时打卡"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+            <!-- 即时启动按钮 -->
+            <LinearLayout
+                android:id="@+id/btn_start_dingding"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/feature_button_background"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_timer"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1分钟启动"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+            <!-- 测试按钮 -->
+            <LinearLayout
+                android:id="@+id/btn_test_dingding"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/feature_button_background"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_test"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="测试启动"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- 状态信息 -->
+        <TextView
+            android:id="@+id/tv_status_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_daily_schedule"
+            android:textSize="14sp"
+            android:textColor="#B3FFFFFF"
+            android:gravity="center"
+            android:lineSpacingExtra="2dp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme -->
+    <style name="Theme.MyScheduler" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- 主色调 -->
+        <item name="colorPrimary">@color/gradient_center</item>
+        <item name="colorPrimaryVariant">@color/gradient_end</item>
+        <item name="colorOnPrimary">@color/white</item>
+        
+        <!-- 次要色调 -->
+        <item name="colorSecondary">@color/gradient_start</item>
+        <item name="colorSecondaryVariant">@color/gradient_center</item>
+        <item name="colorOnSecondary">@color/white</item>
+        
+        <!-- 背景色 -->
+        <item name="android:colorBackground">@color/gradient_end</item>
+        <item name="colorOnBackground">@color/white</item>
+        
+        <!-- 表面色 -->
+        <item name="colorSurface">@color/glass_overlay</item>
+        <item name="colorOnSurface">@color/white</item>
+        
+        <!-- 状态栏和导航栏 -->
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@color/transparent</item>
+        
+        <!-- 窗口透明设置 -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+</resources>
