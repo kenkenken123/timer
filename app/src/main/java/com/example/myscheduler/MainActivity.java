@@ -164,61 +164,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-btnStartDingDing.setOnClickListener(v -> {
-            // 检查钉钉应用是否已安装
-            if (!AlarmReceiver.isDingDingInstalled(this)) {
-                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            
-            // 计算1分钟后的时间
-            Calendar targetTime = Calendar.getInstance();
-            targetTime.add(Calendar.MINUTE, 1);
-            
-            // 创建广播意图
-            Intent broadcastIntent = new Intent(this, AlarmReceiver.class);
-            broadcastIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
-            broadcastIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, AlarmReceiver.TASK_TYPE_INSTANT);
-
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    this, 2001, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
-
-            // 设置一次性闹钟（1分钟后触发）
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                targetTime.getTimeInMillis(),
-                pendingIntent
-            );
-
-            Toast.makeText(this, getString(R.string.toast_instant_task_set), Toast.LENGTH_LONG).show();
-            
-            // 显示即时定时任务的通知
-            notificationHelper.showInstantScheduleNotification();
-        });
-        
-        // 测试按钮：立即启动钉钉应用
-        btnTestDingDing.setOnClickListener(v -> {
-            // 检查钉钉应用是否已安装
-            if (!AlarmReceiver.isDingDingInstalled(this)) {
-                Toast.makeText(this, "❌ 未检测到钉钉应用，请先安装钉钉", Toast.LENGTH_LONG).show();
-                return;
-            }
-            
-            // 直接调用AlarmReceiver的逻辑来测试启动
-            Intent testIntent = new Intent(this, AlarmReceiver.class);
-            testIntent.setAction(AlarmReceiver.ACTION_START_DINGDING);
-            testIntent.putExtra(AlarmReceiver.EXTRA_TASK_TYPE, "test");
-            
-            AlarmReceiver receiver = new AlarmReceiver();
-            receiver.onReceive(this, testIntent);
-            
-            Toast.makeText(this, getString(R.string.toast_testing_start), Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    
     /**
      * 请求通知权限
      */
