@@ -8,12 +8,16 @@ import android.content.pm.ResolveInfo;
 import android.util.Log;
 import android.widget.Toast;
 import java.util.List;
+import java.util.Calendar;
 
 public class AlarmReceiver extends BroadcastReceiver {
     
     private static final String TAG = "AlarmReceiver";
     public static final String ACTION_START_DINGDING = "com.example.myscheduler.START_DINGDING";
     public static final String EXTRA_TASK_TYPE = "task_type";
+    public static final String EXTRA_HOUR = "hour";
+    public static final String EXTRA_MINUTE = "minute";
+    public static final String EXTRA_REQUEST_CODE = "request_code";
     public static final String TASK_TYPE_DAILY = "daily";
     public static final String TASK_TYPE_INSTANT = "instant";
     
@@ -29,6 +33,9 @@ public class AlarmReceiver extends BroadcastReceiver {
             if (TASK_TYPE_DAILY.equals(taskType) && WorkdayHelper.shouldSkipCurrentTask()) {
                 Log.i(TAG, "Weekend detected, skipping task");
                 showToast(context, context.getString(R.string.toast_weekend_skip));
+                
+                // 即使跳过任务，也要重新设置下一次定时任务
+                rescheduleNextWorkdayTask(context, intent);
                 return;
             }
             
@@ -50,6 +57,11 @@ public class AlarmReceiver extends BroadcastReceiver {
                 // 发送失败通知
                 NotificationHelper notificationHelper = new NotificationHelper(context);
                 notificationHelper.showExecutionFailureNotification();
+            }
+            
+            // 如果是每日定时任务，执行完后重新设置下一次定时任务
+            if (TASK_TYPE_DAILY.equals(taskType)) {
+                rescheduleNextWorkdayTask(context, intent);
             }
         }
     }
@@ -149,6 +161,62 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
     }
     
+    /**
+     * 重新设置下一次工作日定时任务
+     */
+    private void rescheduleNextWorkdayTask(Context context, Intent originalIntent) {
+        try {
+            int hour = originalIntent.getIntExtra(EXTRA_HOUR, 9);
+            int minute = originalIntent.getIntExtra(EXTRA_MINUTE, 25);
+            int requestCode = originalIntent.getIntExtra(EXTRA_REQUEST_CODE, 1001);
+            
+            android.app.AlarmManager alarmManager = (android.app.AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager == null) {
+                Log.e(TAG, "AlarmManager服务不可用");
+                return;
+            }
+            
+            // 创建新的广播意图
+            Intent broadcastIntent = new Intent(context, AlarmReceiver.class);
+            broadcastIntent.setAction(ACTION_START_DINGDING);
+            broadcastIntent.putExtra(EXTRA_TASK_TYPE, TASK_TYPE_DAILY);
+            broadcastIntent.putExtra(EXTRA_HOUR, hour);
+            broadcastIntent.putExtra(EXTRA_MINUTE, minute);
+            broadcastIntent.putExtra(EXTRA_REQUEST_CODE, requestCode);
+
+            android.app.PendingIntent pendingIntent = android.app.PendingIntent.getBroadcast(
+                    context, requestCode, broadcastIntent, android.app.PendingIntent.FLAG_IMMUTABLE);
+
+            // 获取下一个工作日的指定时间
+            java.util.Calendar targetTime = WorkdayHelper.getNextWorkdayTime(hour, minute);
+            
+            // 设置下一次定时任务
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    android.app.AlarmManager.RTC_WAKEUP,
+                    targetTime.getTimeInMillis(),
+                    pendingIntent
+                );
+            } else {
+                alarmManager.setExact(
+                    android.app.AlarmManager.RTC_WAKEUP,
+                    targetTime.getTimeInMillis(),
+                    pendingIntent
+                );
+            }
+            
+            Log.i(TAG, String.format("重新设置下一次工作日定时任务: %02d:%02d, 下次执行: %s", 
+                    hour, minute, android.text.format.DateFormat.format("yyyy-MM-dd HH:mm:ss", targetTime)));
+                    
+            // 更新通知显示下次执行时间
+            NotificationHelper notificationHelper = new NotificationHelper(context);
+            notificationHelper.showDailyScheduleNotification();
+            
+        } catch (Exception e) {
+            Log.e(TAG, "重新设置定时任务失败: " + e.getMessage(), e);
+        }
+    }
+
     /**
      * 检查钉钉应用是否已安装
      */
