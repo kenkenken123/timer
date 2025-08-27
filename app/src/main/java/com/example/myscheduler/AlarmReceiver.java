@@ -26,7 +26,8 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "AlarmReceiver triggered: " + intent.getAction());
-        
+        try{
+            
         if (ACTION_START_DINGDING.equals(intent.getAction())) {
             String taskType = intent.getStringExtra(EXTRA_TASK_TYPE);
             Log.d(TAG, "Task type: " + taskType);
@@ -66,6 +67,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             if (TASK_TYPE_DAILY.equals(taskType)) {
                 rescheduleNextWorkdayTask(context, intent);
             }
+        }
         } catch (Exception e) {
             String errorMsg = "❌ AlarmReceiver处理异常: " + e.getMessage();
             Log.e(TAG, "AlarmReceiver处理异常: " + e.getMessage(), e);
